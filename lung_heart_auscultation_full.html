@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lung and Heart Sounds for Medicine</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+      background: linear-gradient(to bottom, #ebf8ff, #c6f6d5);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    h1 {
+      text-align: center;
+      color: darkred;
+    }
+    .description {
+      max-width: 800px;
+      margin: 0 auto 25px auto;
+      text-align: center;
+    }
+    .toggle-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .toggle-switch {
+      padding: 8px 16px;
+      background-color: darkred;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .search-box {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 10px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input {
+      padding: 10px;
+      width: 60%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: darkred;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 1.4em;
+      margin-top: 30px;
+      color: darkgreen;
+      text-decoration: underline;
+    }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: auto;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark .card {
+      background: #1e1e1e;
+      color: #f0f0f0;
+    }
+    iframe {
+      width: 100%;
+      height: 80px;
+      border: none;
+      margin-top: 10px;
+    }
+    .collapsible {
+      background-color: #eee;
+      color: #444;
+      cursor: pointer;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 14px;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    body.dark .collapsible {
+      background-color: #444;
+      color: #eee;
+    }
+    .content {
+      padding: 0 10px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+      background-color: #f9f9f9;
+      border-radius: 0 0 6px 6px;
+      font-size: 0.9em;
+      color: #333;
+    }
+    body.dark .content {
+      background-color: #333;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-container">
+    <button class="toggle-switch" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+  </div>
+
+  <h1>Lung and Heart Sounds for Medicine</h1>
+  <div class="description">
+    All are welcome. I'm Isuru Awishka Wijesekara (19/20 BATCH Faculty of Medicine UOP).<br />
+    Here I included most of lung and heart sounds which can be used for practicing auscultation.<br />
+    You can use this free.
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search all sounds..." />
+    <button onclick="handleSearch()">Search</button>
+  </div>
+
+  <div class="subtitle">LUNG SOUNDS</div>
+  <div class="results" id="resultsContainer"></div>
+
+  <div class="subtitle">HEART SOUNDS</div>
+  <h3 class="subtitle">Systolic Murmurs</h3>
+  <div class="results" id="systolic"></div>
+
+  <h3 class="subtitle">Diastolic Murmurs</h3>
+  <div class="results" id="diastolic"></div>
+
+  <h3 class="subtitle">Other Heart Sounds</h3>
+  <div class="results" id="other"></div>
+
+<script>
+const lungSounds = [
+  {
+    title: "Bronchial breathing",
+    src: "https://drive.google.com/file/d/1Ae8xkr_LYPb1FX8xjo2Q9P5Wp-a2z1dR/preview",
+    definition: "Harsh tubular breath sound normally heard over the trachea.",
+    conditions: "Pneumonia with consolidation, lung fibrosis.",
+    bestHeard: "Over areas of lung consolidation."
+  },
+  {
+    title: "Vesicular breathing",
+    src: "https://drive.google.com/file/d/15V7NL4NXQrc55ygPR2-i-arptXAt8EXg/preview",
+    definition: "Soft, low-pitched normal breath sound.",
+    conditions: "Healthy individuals.",
+    bestHeard: "Peripheral lung fields."
+  },
+  {
+    title: "Coarse crackles",
+    src: "https://drive.google.com/file/d/1ByeiuT9PO5gvSDjgq2yAM0Pryo8KnqJj/preview",
+    definition: "Loud, low-pitched bubbling sounds.",
+    conditions: "Bronchiectasis, pulmonary edema.",
+    bestHeard: "Lower lung zones during inspiration."
+  },
+  {
+    title: "Fine crackles",
+    src: "https://drive.google.com/file/d/1CRVCCrqNf06z9iv7O1hgIHIdJupBbFBb/preview",
+    definition: "High-pitched, brief crackling sounds.",
+    conditions: "Pulmonary fibrosis, interstitial lung disease.",
+    bestHeard: "Bases of lungs, at the end of inspiration."
+  },
+  {
+    title: "Stridor",
+    src: "https://drive.google.com/file/d/1jGC_05DgOlVWtbpjUF-hHBnHCH02LiO_/preview",
+    definition: "High-pitched sound due to upper airway obstruction.",
+    conditions: "Croup, laryngeal obstruction.",
+    bestHeard: "Over neck and upper chest during inspiration."
+  },
+  {
+    title: "Wheezing",
+    src: "https://drive.google.com/file/d/1FM13m4_MUv-p_qlKleIurZvZQjwPA5M2/preview",
+    definition: "Musical high-pitched sounds from narrowed airways.",
+    conditions: "Asthma, COPD.",
+    bestHeard: "All over lungs, especially during expiration."
+  },
+  {
+    title: "Rhonchi",
+    src: "https://drive.google.com/file/d/1LKb3KuWsI2l42-QIBOeJ2BDF5GTGB7qE/preview",
+    definition: "Low-pitched snoring sounds.",
+    conditions: "Chronic bronchitis.",
+    bestHeard: "Central airways during expiration."
+  },
+  {
+    title: "Pleural rub",
+    src: "https://drive.google.com/file/d/1BjwJRbfN9tnxv0E5m74-fQeHic0wwZsD/preview",
+    definition: "Grating sound from inflamed pleural surfaces.",
+    conditions: "Pleuritis, pneumonia.",
+    bestHeard: "Lower lateral chest during both phases."
+  },
+  {
+    title: "Diminished breath sounds",
+    src: "https://drive.google.com/file/d/1JKcrKDygTE5JHGSB16fY6FlG0u2jy8t0/preview",
+    definition: "Soft or inaudible breath sounds.",
+    conditions: "Pleural effusion, pneumothorax.",
+    bestHeard: "Affected lung areas."
+  }
+];
+
+const systolic = [
+  {
+    title: "Aortic Stenosis",
+    src: "https://drive.google.com/file/d/1zQsIE1GlstHLaQhyseCpg2F7S-vKm8My/preview",
+    definition: "Crescendo-decrescendo systolic murmur due to narrowed aortic valve.",
+    conditions: "Aortic stenosis.",
+    bestHeard: "Right 2nd ICS, radiating to carotids."
+  },
+  {
+    title: "Pulmonic Stenosis",
+    src: "https://drive.google.com/file/d/1zQsIE1GlstHLaQhyseCpg2F7S-vKm8My/preview",
+    definition: "Crescendo-decrescendo systolic murmur from RV outflow obstruction.",
+    conditions: "Pulmonic stenosis.",
+    bestHeard: "Left 2nd ICS."
+  },
+  {
+    title: "Mitral Regurgitation",
+    src: "https://drive.google.com/file/d/1SVtlhw5ON98UGz1ni3fqKaZ2TZLBpfoI/preview",
+    definition: "Blowing pansystolic murmur from mitral valve incompetence.",
+    conditions: "Mitral regurgitation.",
+    bestHeard: "Apex, radiating to axilla."
+  },
+  {
+    title: "Tricuspid Regurgitation",
+    src: "https://drive.google.com/file/d/1SVtlhw5ON98UGz1ni3fqKaZ2TZLBpfoI/preview",
+    definition: "Blowing pansystolic murmur due to tricuspid incompetence.",
+    conditions: "Tricuspid regurgitation.",
+    bestHeard: "Left lower sternal border, increases with inspiration."
+  },
+  {
+    title: "Ventricular Septal Defect (VSD)",
+    src: "https://drive.google.com/file/d/1CX4RXWz6t2QAmTZdl4MZHR6E278MWq69/preview",
+    definition: "Harsh pansystolic murmur from left-to-right shunt.",
+    conditions: "VSD.",
+    bestHeard: "Left 3rd-4th ICS parasternal region."
+  }
+];
+
+const diastolic = [
+  {
+    title: "Aortic Regurgitation",
+    src: "https://drive.google.com/file/d/1Snrbkj7KYo-GJ-2zrhSf79vKwq2euSvw/preview",
+    definition: "High-pitched early diastolic decrescendo murmur.",
+    conditions: "Aortic regurgitation.",
+    bestHeard: "Left 3rd ICS, patient leaning forward."
+  },
+  {
+    title: "Pulmonic Regurgitation",
+    src: "https://drive.google.com/file/d/1Snrbkj7KYo-GJ-2zrhSf79vKwq2euSvw/preview",
+    definition: "Early diastolic murmur due to pulmonary valve insufficiency.",
+    conditions: "Pulmonary hypertension.",
+    bestHeard: "Left upper sternal border."
+  },
+  {
+    title: "Mitral Stenosis",
+    src: "https://drive.google.com/file/d/1w85pyfUGAgg_OGBzyn2Zw6YnfNEU0Rgj/preview",
+    definition: "Low-pitched rumbling mid-diastolic murmur.",
+    conditions: "Mitral stenosis.",
+    bestHeard: "Apex with bell, patient in left lateral position."
+  },
+  {
+    title: "Tricuspid Stenosis",
+    src: "https://drive.google.com/file/d/1w85pyfUGAgg_OGBzyn2Zw6YnfNEU0Rgj/preview",
+    definition: "Diastolic rumble increased with inspiration.",
+    conditions: "Tricuspid stenosis.",
+    bestHeard: "Left lower sternal border."
+  }
+];
+
+const other = [
+  {
+    title: "Patent Ductus Arteriosus (PDA)",
+    src: "https://drive.google.com/file/d/1fF13F1tlj6bUkBgQKdqunRtApPpGMmmY/preview",
+    definition: "Continuous machine-like murmur.",
+    conditions: "Patent ductus arteriosus.",
+    bestHeard: "Left infraclavicular area."
+  },
+  {
+    title: "S3 Gallop",
+    src: "https://drive.google.com/file/d/1fgg6nO7MW1Mu3SUYhQJL2ceJmjhnGygp/preview",
+    definition: "Low-pitched sound after S2 due to rapid ventricular filling.",
+    conditions: "Heart failure, volume overload.",
+    bestHeard: "Apex with bell."
+  },
+  {
+    title: "S3 & S4 Gallop",
+    src: "https://drive.google.com/file/d/1m1drdnHFDd2U_0o_Z-5VZ7-7EvDl8Drj/preview",
+    definition: "Presence of both S3 and S4 sounds.",
+    conditions: "Severe heart failure.",
+    bestHeard: "Apex with bell."
+  },
+  {
+    title: "S4 Alone",
+    src: "https://drive.google.com/file/d/1MHc6sPI1RVSXqCNwZoX8pKNZWR4PllLH/preview",
+    definition: "Late diastolic sound before S1.",
+    conditions: "Left ventricular hypertrophy.",
+    bestHeard: "Apex in left lateral position."
+  },
+  {
+    title: "Normal Heart Sound",
+    src: "https://drive.google.com/file/d/1VpGb-lyVfOO88SG76Rd4HAGrpqwGVSRr/preview",
+    definition: "S1 and S2 heard clearly with normal split.",
+    conditions: "Normal heart.",
+    bestHeard: "All auscultation areas."
+  },
+  {
+    title: "Innocent Murmur",
+    src: "https://drive.google.com/file/d/13CRKQYDN_FKs3ZA0D8LcQyyKnf30rVlo/preview",
+    definition: "Soft systolic murmur heard in children/young adults.",
+    conditions: "Benign, no pathology.",
+    bestHeard: "Left sternal border."
+  }
+];
+
+const allSounds = [...lungSounds, ...systolic, ...diastolic, ...other];
+
+function renderSounds(arr, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  arr.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h3>${item.title}</h3>
+      <iframe src="${item.src}" allow="autoplay"></iframe>
+      <button class="collapsible">Show Details</button>
+      <div class="content">
+        <p><strong>Definition:</strong> ${item.definition}</p>
+        <p><strong>Conditions:</strong> ${item.conditions}</p>
+        <p><strong>Best heard at:</strong> ${item.bestHeard}</p>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function handleSearch() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  renderSounds(lungSounds.filter(s => s.title.toLowerCase().includes(query)), "resultsContainer");
+  renderSounds(systolic.filter(s => s.title.toLowerCase().includes(query)), "systolic");
+  renderSounds(diastolic.filter(s => s.title.toLowerCase().includes(query)), "diastolic");
+  renderSounds(other.filter(s => s.title.toLowerCase().includes(query)), "other");
+  setupCollapsibles();
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark");
+}
+
+function setupCollapsibles() {
+  document.querySelectorAll(".collapsible").forEach(btn => {
+    btn.addEventListener("click", function () {
+      this.classList.toggle("active");
+      const content = this.nextElementSibling;
+      content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+    });
+  });
+}
+
+window.onload = function () {
+  renderSounds(lungSounds, "resultsContainer");
+  renderSounds(systolic, "systolic");
+  renderSounds(diastolic, "diastolic");
+  renderSounds(other, "other");
+  setupCollapsibles();
+};
+</script>
+</body>
+</html>
